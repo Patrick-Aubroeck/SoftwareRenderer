@@ -2,12 +2,14 @@
 #define _KERNEL_H_
 
 #include "device.h"
+#include "fpscounter.h"
 
 class Kernel 
 {
 private:
 	Device* m_device; // The device.
 	Window* m_window;
+	FpsCounter* m_fpsCounter;
 
 public:
 	Kernel(); // Constructor, Also creates a device

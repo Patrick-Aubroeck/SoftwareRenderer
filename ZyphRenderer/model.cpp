@@ -73,7 +73,7 @@ void Model::LoadModel(std::string filePath)
 	}
 
 	m_position = ZyphMaths::Vector3(m_vertexStructure[0].coordinates.x, m_vertexStructure[0].coordinates.y, m_vertexStructure[0].coordinates.z);
-	//m_texture = new Texture("../Textures/shockwavetest.bmp", 1024, 1024);
+	m_texture = new Texture("../Textures/shockwavetest.bmp", 1024, 1024);
 	// Close the model file.
 	fin.close();
 

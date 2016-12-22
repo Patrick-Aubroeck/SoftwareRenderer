@@ -42,6 +42,9 @@
     <ClInclude Include="zyphsettings.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="fpscounter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="bitmap.cpp">
@@ -69,6 +72,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="fpscounter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

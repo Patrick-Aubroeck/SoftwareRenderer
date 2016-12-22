@@ -2,6 +2,7 @@
 
 #include "device.h"
 #include "ZyphMath.h"
+#include "Utility.h"
 #include <math.h>
 
 /// <summary> Constructor</summary>
@@ -135,25 +136,24 @@ void Device::ProcessScanLine(ScanLineData data, Model::Vertex vertex1, Model::Ve
 	float sx = ZyphMaths::ZyphMath::INTERPOLATE(vertex1.coordinates.x, vertex2.coordinates.x, gradient1);
 	float ex = ZyphMaths::ZyphMath::INTERPOLATE(vertex3.coordinates.x, vertex4.coordinates.x, gradient2);
 
-	//// starting Z & ending Z
-	//float z1 = ZyphMaths::ZyphMath::INTERPOLATE(vertex1.coordinates.z, vertex2.coordinates.z, gradient1);
-	//float z2 = ZyphMaths::ZyphMath::INTERPOLATE(vertex3.coordinates.z, vertex4.coordinates.z, gradient2);
+	// starting Z & ending Z
+	float z1 = ZyphMaths::ZyphMath::INTERPOLATE(vertex1.coordinates.z, vertex2.coordinates.z, gradient1);
+	float z2 = ZyphMaths::ZyphMath::INTERPOLATE(vertex3.coordinates.z, vertex4.coordinates.z, gradient2);
 
-	//float snl = ZyphMaths::ZyphMath::INTERPOLATE(data.ndotla, data.ndotlb, gradient1);
-	//float enl = ZyphMaths::ZyphMath::INTERPOLATE(data.ndotlc, data.ndotld, gradient2);
+	float snl = ZyphMaths::ZyphMath::INTERPOLATE(data.ndotla, data.ndotlb, gradient1);
+	float enl = ZyphMaths::ZyphMath::INTERPOLATE(data.ndotlc, data.ndotld, gradient2);
 
-	//// Interpolating texture coordinates on Y
-	//float su = ZyphMaths::ZyphMath::INTERPOLATE(data.ua, data.ub, gradient1);
-	//float eu = ZyphMaths::ZyphMath::INTERPOLATE(data.uc, data.ud, gradient2);
-	//float sv = ZyphMaths::ZyphMath::INTERPOLATE(data.va, data.vb, gradient1);
-	//float ev = ZyphMaths::ZyphMath::INTERPOLATE(data.vc, data.vd, gradient2);
+	// Interpolating texture coordinates on Y
+	float su = ZyphMaths::ZyphMath::INTERPOLATE(data.ua, data.ub, gradient1);
+	float eu = ZyphMaths::ZyphMath::INTERPOLATE(data.uc, data.ud, gradient2);
+	float sv = ZyphMaths::ZyphMath::INTERPOLATE(data.va, data.vb, gradient1);
+	float ev = ZyphMaths::ZyphMath::INTERPOLATE(data.vc, data.vd, gradient2);
 
 	// drawing a line from left (sx) to right (ex)
 	for (int x = sx; x < ex; x++)
 	{
-		DrawPoint(ZyphMaths::Vector3(x, data.currentY, 1.0f), color);
 
-	/*	float gradient = (x - sx) / (ex - sx);
+		float gradient = (x - sx) / (ex - sx);
 
 		float z = ZyphMaths::ZyphMath::INTERPOLATE(z1, z2, gradient);
 		float ndotL = ZyphMaths::ZyphMath::INTERPOLATE(snl, enl, gradient);
@@ -170,7 +170,9 @@ void Device::ProcessScanLine(ScanLineData data, Model::Vertex vertex1, Model::Ve
 		{
 			textureColor = ZyphMaths::Vector4::ONE;
 		}
-*/
+
+		DrawPoint(ZyphMaths::Vector3(x, data.currentY, 1.0f), color * textureColor);
+
 	}
 }
 
@@ -214,33 +216,148 @@ void Device::DrawPoint(ZyphMaths::Vector3& point, ZyphMaths::Vector4 color)
 	}
 }
 
-/// <summary> Draws a line on the screen using bressingham algorithm. </summary>
-void Device::DrawBline(ZyphMaths::Vector2 point0, ZyphMaths::Vector2 point1)
+/// <summary> Draws a line on the screen using bresenham algorithm. </summary>
+/// <param name="point0"> The startingpoint on screenspace. </param>
+/// <param name="point1"> The endpoint on screenspace. </param>
+void Device::DrawBLine(ZyphMaths::Vector2 point0, ZyphMaths::Vector2 point1)
 {
 	int x0 = (int)point0.x;
 	int y0 = (int)point0.y;
 	int x1 = (int)point1.x;
 	int y1 = (int)point1.y;
 
-	int dx = abs(x1 - x0);
-	int dy = abs(y1 - y0);
-	int sx = (x0 < x1) ? 1 : -1;
-	int sy = (y0 < y1) ? 1 : -1;
+	int dx = abs(x1 - x0); // Get delta x.
+	int dy = abs(y1 - y0); // Get delta y.
+	int sx = (x0 < x1) ? 1 : -1; // Get slope x.
+	int sy = (y0 < y1) ? 1 : -1; // Get slope y.
 	int err = dx - dy;
 
 	while ((x0 != x1) && (y0 != y1)) {
 		DrawPoint(ZyphMaths::Vector3(x0, y0, 1.0f), ZyphMaths::Vector4::ONE);
 
 		int e2 = 2 * err;
-		if (e2 > -dy)
+		if (e2 > -dy) // Move on the y axis.
 		{
 			err -= dy;
 			x0 += sx;
 		}
-		if (e2 < dx)
+		if (e2 < dx) // Move on the x axis.
 		{
 			err += dx;
 			y0 += sy;
+		}
+	}
+}
+
+void Device::DrawDDALine(ZyphMaths::Vector2 point0, ZyphMaths::Vector2 point1)
+{
+	float m = (point1.y - point0.y) / (point1.x - point0.x);
+	if (m < 1)
+	{
+		float y = point0.y;
+		for (int x = point0.x; x <= point1.x; x++, y += m)
+		{
+			DrawPoint(ZyphMaths::Vector3(x, round(y), 1.0f), ZyphMaths::Vector4::ONE);
+		}
+	}
+	else
+	{
+		float x = point0.x;
+		for (int y = point0.y; y <= point1.y; y++, x += 1/m)
+		{
+			DrawPoint(ZyphMaths::Vector3(round(x), y, 1.0f), ZyphMaths::Vector4::ONE);
+		}
+	}
+}
+
+void Device::DrawWuLine(ZyphMaths::Vector2 point0, ZyphMaths::Vector2 point1)
+{
+	float x0 = point0.x;
+	float y0 = point0.y;
+	float x1 = point1.x;
+	float y1 = point1.y;
+
+	bool steep = abs(point1.y - point0.y) > abs(point1.x - point0.x);
+	
+	if (steep)
+	{
+		float temp = point0.x;
+		point0.x = point0.y;
+		point0.y = temp;
+		temp = point1.x;
+		point1.x = point1.y;
+		point1.y = temp;
+	}
+	if (point0.x > point1.x)
+	{
+		float temp = point0.x;
+		point0.x = point1.x;
+		point1.x = temp;
+		temp = point0.y;
+		point0.y = point1.y;
+		point1.y = temp;
+	}
+	
+	float dx = point1.x - point0.x;
+	float dy = point1.y - point0.y;
+
+	float gradient = dy / dx;
+
+	//handle first endpoint
+	float xEnd = Utility::Round(point0.x);
+	float yEnd = point0.y + gradient * (xEnd - point0.x);
+	float xGap = Utility::RfPart(point0.x + 0.5);
+	float xpxl1 = xEnd;
+	float ypxl1 = yEnd;
+
+	if (steep)
+	{
+		DrawPoint(ZyphMaths::Vector3(ypxl1, xpxl1, 1.0f), ZyphMaths::Vector4(0.54f, 0.54f, 0.54f, Utility::RfPart(yEnd) * xGap));
+		DrawPoint(ZyphMaths::Vector3(ypxl1 + 1, xpxl1 , 1.0f), ZyphMaths::Vector4(0.54f, 0.54f, 0.54f, Utility::FPart(yEnd) * xGap));
+	}
+	else
+	{
+		DrawPoint(ZyphMaths::Vector3(xpxl1, ypxl1, 1.0f), ZyphMaths::Vector4(0.54f, 0.54f, 0.54f, Utility::RfPart(yEnd) * xGap));
+		DrawPoint(ZyphMaths::Vector3(xpxl1, ypxl1 + 1, 1.0f), ZyphMaths::Vector4(0.54f, 0.54f, 0.54f, Utility::FPart(yEnd) * xGap));
+	}
+
+	float intery = yEnd + gradient;
+
+	// handle second endpoint.
+
+	xEnd = Utility::Round(point1.x);
+	yEnd = point1.y + gradient * (xEnd - point1.x);
+	xGap = Utility::FPart(point1.x + 0.5);
+	float xpxl2 = xEnd;
+	float ypxl2 = Utility::IPart(yEnd);
+
+	if (steep)
+	{
+		DrawPoint(ZyphMaths::Vector3(ypxl2, xpxl2, 1.0f), ZyphMaths::Vector4(0.54f, 0.54f, 0.54f, Utility::RfPart(yEnd) * xGap));
+		DrawPoint(ZyphMaths::Vector3(ypxl2 + 1, xpxl2, 1.0f), ZyphMaths::Vector4(0.54f, 0.54f, 0.54f, Utility::FPart(yEnd) * xGap));
+	}
+	else
+	{
+		DrawPoint(ZyphMaths::Vector3(xpxl2, ypxl2, 1.0f), ZyphMaths::Vector4(0.54f, 0.54f, 0.54f, Utility::RfPart(yEnd) * xGap));
+		DrawPoint(ZyphMaths::Vector3(xpxl2, ypxl2 + 1, 1.0f), ZyphMaths::Vector4(0.54f, 0.54f, 0.54f, Utility::FPart(yEnd) * xGap));
+	}
+
+	if (steep)
+	{
+		for (int x = xpxl1 + 1; x <= xpxl2 - 1; x++)
+		{
+			DrawPoint(ZyphMaths::Vector3(Utility::IPart(intery), x, 1.0f), ZyphMaths::Vector4(0.54f, 0.54f, 0.54f, Utility::RfPart(intery)));
+			DrawPoint(ZyphMaths::Vector3(Utility::IPart(intery) + 1, x, 1.0f), ZyphMaths::Vector4(0.54f, 0.54f, 0.54f, Utility::FPart(intery)));
+			intery = intery + gradient;
+		}
+	}
+	else
+	{
+		for (int x = xpxl1 + 1; x <= xpxl2 - 1; x++)
+		{
+			DrawPoint(ZyphMaths::Vector3(x, Utility::IPart(intery), 1.0f), ZyphMaths::Vector4(0.54f, 0.54f, 0.54f, Utility::RfPart(intery)));
+			DrawPoint(ZyphMaths::Vector3(x, Utility::IPart(intery) + 1, 1.0f), ZyphMaths::Vector4(0.54f, 0.54f, 0.54f, Utility::FPart(intery)));
+			intery = intery + gradient;
 		}
 	}
 }
@@ -431,20 +548,20 @@ void Device::RenderLine(Camera camera, Model models[], int modelCount)
 
 		for (int j = 0; j < models[i].m_vertexCount; j += 3)
 		{
-			ZyphMaths::Vector3 vec3 = ZyphMaths::Vector3::TransformNormal(models[i].m_vertexStructure[j + 0].normal, (worldMatrix * viewMatrix));
+		/*	ZyphMaths::Vector3 vec3 = ZyphMaths::Vector3::TransformNormal(models[i].m_vertexStructure[j + 0].normal, (worldMatrix * viewMatrix));
 
 			if (vec3.z >= 0)
 			{
 				break;
 			}
-
+*/
 			ZyphMaths::Vector2 point1 = Project(models[i].m_vertexStructure[j + 0].coordinates, transformMatrix);
 			ZyphMaths::Vector2 point2 = Project(models[i].m_vertexStructure[j + 1].coordinates, transformMatrix);
 			ZyphMaths::Vector2 point3 = Project(models[i].m_vertexStructure[j + 2].coordinates, transformMatrix);
 
-			DrawBline(point1, point2);
-			DrawBline(point2, point3);
-			DrawBline(point3, point1);
+			DrawBLine(point1, point2);
+			DrawBLine(point2, point3);
+			DrawBLine(point3, point1);
 		}
 	}
 }

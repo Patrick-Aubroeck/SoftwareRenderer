@@ -19,13 +19,13 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{A7FBA78E-52E0-41B4-AC1B-E9964CA99066}</ProjectGuid>
-    <RootNamespace>ZyphRenderer</RootNamespace>
+    <ProjectGuid>{01C824AA-852F-4A74-9366-ED687AD89283}</ProjectGuid>
+    <RootNamespace>Utility</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
@@ -68,35 +68,20 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(IncludePath)</IncludePath>
-  </PropertyGroup>
+  <PropertyGroup />
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Users\Patrick\Documents\Visual Studio 2015\Projects\ZyphMath\ZyphMath;C:\Users\Patrick\Documents\Visual Studio 2015\Projects\SoftwareRenderer\Utility;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
-    <Lib>
-      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
-    </Lib>
-    <Link>
-      <AdditionalDependencies>ZyphMath.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\Users\Patrick\Documents\Visual Studio 2015\Projects\SoftwareRenderer\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Users\Patrick\Documents\Visual Studio 2015\Projects\ZyphMath\ZyphMath;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
-    <Link>
-      <AdditionalLibraryDirectories>C:\Users\Patrick\Documents\Visual Studio 2015\Projects\SoftwareRenderer\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>ZyphMath.lib;%(AdditionalDependencies)</AdditionalDependencies>
-    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -125,33 +110,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="bitmap.h" />
-    <ClInclude Include="camera.h" />
-    <ClInclude Include="device.h" />
-    <ClInclude Include="fpscounter.h" />
-    <ClInclude Include="kernel.h" />
-    <ClInclude Include="model.h" />
-    <ClInclude Include="scanlinedata.h" />
-    <ClInclude Include="texture.h" />
-    <ClInclude Include="window.h" />
-    <ClInclude Include="zyphsettings.h" />
+    <ClInclude Include="Utility.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="bitmap.cpp" />
-    <ClCompile Include="camera.cpp" />
-    <ClCompile Include="device.cpp" />
-    <ClCompile Include="fpscounter.cpp" />
-    <ClCompile Include="kernel.cpp" />
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="model.cpp" />
-    <ClCompile Include="scanlinedata.cpp" />
-    <ClCompile Include="texture.cpp" />
-    <ClCompile Include="window.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Utility\Utility.vcxproj">
-      <Project>{01c824aa-852f-4a74-9366-ed687ad89283}</Project>
-    </ProjectReference>
+    <ClCompile Include="Utility.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
